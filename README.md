@@ -66,3 +66,7 @@ Run `npm run compile`, then open [dev/preview.html](dev/preview.html) in a brows
 ## Credits
 
 Pixel font: Press Start 2P by CodeMan38 (SIL Open Font License, see `media/fonts/OFL.txt`).
+
+## License
+
+MIT, see [LICENSE](LICENSE). The bundled font keeps its own license (OFL).
