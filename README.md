@@ -1,67 +1,71 @@
-# Karaoke
+# VSCaraoke 🎤
 
-A VS Code panel that shows time-synced lyrics for whatever is playing on Spotify. A small pixel stage at the bottom has a beat-driven visualizer and dancing "sproutlings".
+Your code editor, but it sings.
 
-## Setup
+VSCaraoke adds a little panel to VS Code that shows synced lyrics for whatever you're playing on Spotify. Below the lyrics, your pixelated fans dance along to the beat. They have no training but it's enough to look cute.
 
-1. Go to <https://developer.spotify.com/dashboard> and create an app.
-   - Redirect URI: `http://127.0.0.1:43821/callback`
-   - API: Web API
+![VSCaraoke in action](docs/preview.gif)
+
+## Meet the crew
+
+| | |
+|---|---|
+| **Sproutling** | Round, pink-ish, has a leaf. The original. |
+| **Capling** | A mushroom with moves. |
+| **Wisp** | A tiny ghost. Doesn't hop, does loops instead. |
+| **Beepbox** | A robot with a screen for a face. Blinks its antenna on the beat. |
+| **Dribble** | A slime drop. Very bouncy. |
+| **Skitter** | Bugs. The dance floor is outside. Noone wants them there. |
+
+Every bar they pick a new move: bob, hop, sway, wave, spin, stomp, headbang. Sometimes one leaps across the stage. Sometimes one trips and lies there for a few beats. It happens. There's confetti every 8 bars, music notes and hearts float up, and their colors come from the album cover.
+
+**Click the dance floor** to give everyone a fresh paint job.
+
+## Setup (about 3 minutes)
+
+Spotify wants every app to have its own key, so you'll need to make one. Spotify Premium is unfortunately required for this to work. If you have it, it is free:
+
+1. Go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) and create an app.
+   - **Redirect URI:** `http://127.0.0.1:43821/callback`
+   - **API:** Web API
 2. Copy the app's **Client ID** into the `karaoke.spotifyClientId` setting.
-3. Open the **Karaoke** panel (next to Terminal / Output) and click **Sign in to Spotify**.
+3. Open the **Karaoke** tab in the bottom panel (next to Terminal) and hit **Sign in to Spotify**.
+4. Play something and sing along (required)
+
+Port 43821 already taken for whatever reason? Set `karaoke.redirectUri` to another one, like `http://127.0.0.1:8888/callback`, and add that exact URL to your Spotify app instead.
+
+## Make it yours
+
+Click the ⚙ in the panel's title bar to open all settings.
+
+| Setting | Default | |
+|---|---|---|
+| `karaoke.chaos` | `lively` | `calm`, `lively` or `chaos`. `chaos` comes with screen shake. You've been warned. |
+| `karaoke.creatureCount` | `6` | Up to 12 dancers. |
+| `karaoke.species` | all | Pick your favorites, e.g. `["wisp", "beepbox"]`. |
+| `karaoke.lineFill` | `instant` | `instant` lights up the whole line. `sweep` fills it as it's sung. |
+| `karaoke.showVisualizer` | on | The bars behind the crowd. |
+| `karaoke.stageHeight` | `112` | More room for the dance floor. |
+| `karaoke.lyricsOffsetMs` | `0` | Lyrics consistently early or late? Nudge them here. |
+| `karaoke.redirectUri` | `http://127.0.0.1:43821/callback` | Only if you need a different sign-in port. |
+
+## When things are a little off
+
+- **Wrong lyrics?** Run **Karaoke: Search Lyrics Manually** and pick the right ones. VSCaraoke remembers your pick for that song.
+- **Lyrics a bit early or late?** **Karaoke: Show Lyrics Earlier / Later** shifts them in 250 ms steps.
+- **Creatures dancing off-beat?** Some songs have no tempo info. Click the BPM label in the top right 3–4 times along with the beat to set it.
 
 ## How it works
 
-- **Now playing:** the extension polls Spotify's `currently-playing` endpoint, every second while music plays. It only polls while the panel is visible. The webview interpolates playback position between polls, so the highlighting stays smooth.
-- **Lyrics:** the extension looks lyrics up on [LRCLIB](https://lrclib.net) in this order:
-  1. Exact match.
-  2. Normalized title (drops "Remastered", "feat.", "Live" and similar) and first artist only.
-  3. Search, choosing the result closest in duration.
-  4. Unsynced plain lyrics.
+- **Lyrics** come from [LRCLIB](https://lrclib.net), a free community lyrics database. If the exact title doesn't match, VSCaraoke cleans it up (drops "Remastered", "feat." and similar) and tries again.
+- **Tempo** comes from [ReccoBeats](https://reccobeats.com) when they know the song.
+- **The visualizer is fake.** VS Code can't hear your music, so the bars and dancers follow the song's tempo instead of the actual sound. Don't tell them, they are still having fun.
 
-  Results are cached per track.
-- **Tempo:** comes from [ReccoBeats](https://reccobeats.com) when the song is in their database. Spotify no longer provides audio features to new apps. If the tempo is unknown, click the BPM label in the header in time with the music (3+ taps) to set it. Tapping also lines the beat up with the song.
-- **Visualizer:** this is simulated, not real audio. VS Code webviews can't access system audio, so the bars and dancers follow the beat clock instead of an FFT.
+## Invite your friends to your own place
 
-## Commands (`Karaoke: …`)
+The creatures are text grids in [src/webview/sprites.ts](src/webview/sprites.ts), one digit per color. Copy one, redraw it, and you have a new species.
 
-| Command | What it does |
-|---|---|
-| Search Lyrics Manually | Pick the right LRCLIB entry when the automatic match is wrong. The choice is remembered for that track. |
-| Show Lyrics Earlier / Later | Shift lyric timing in 250 ms steps (for this track only). |
-| Reload Lyrics | Ignore the cache and look the lyrics up again. |
-| Tap Tempo | Same as clicking the BPM label. |
-| Sign in / Sign out of Spotify | |
-
-## Settings
-
-| Setting | Default | What it does |
-|---|---|---|
-| `karaoke.chaos` | `lively` | How messy the stage gets: `calm`, `lively` or `chaos`. |
-| `karaoke.creatureCount` | 6 | How many dancers (0–12). |
-| `karaoke.species` | all | Which creatures can appear: `sproutling`, `capling`, `wisp`, `beepbox`, `dribble`. |
-| `karaoke.stageHeight` | 112 | Height of the stage in pixels. |
-| `karaoke.showVisualizer` | on | Bars behind the dancers. |
-| `karaoke.lyricsOffsetMs` | 0 | Global lyric offset. Positive values show lyrics later. |
-
-## The stage
-
-- **sproutling:** round blob with a leaf.
-- **capling:** little mushroom.
-- **wisp:** floating ghost with a wiggly tail.
-- **beepbox:** robot with a screen face and a blinking antenna.
-- **dribble:** slime drop.
-- **skitter:** bug that runs around on its own. You don't pick these; the chaos level decides how many there are.
-
-Click the stage to give every creature a new random color. A new song switches back to colors taken from the album art.
-
-Every bar, each dancer picks a new move. Moves include bob, hop, sway, wave, cheer, spin, stomp and headbang. Wisps do loops instead of hopping. On higher chaos levels dancers also leap across the stage or trip and lie dazed for a few beats. Extras: music notes, hearts, dust puffs, confetti every 8 bars, and screen shake on `chaos`.
-
-Sprites are text grids in [src/webview/sprites.ts](src/webview/sprites.ts), one digit per palette slot (outline, body, highlight, shade, eye, accent and so on). To make a new creature, copy one of them and redraw it.
-
-### Preview without Spotify
-
-Run `npm run compile`, then open [dev/preview.html](dev/preview.html) in a browser. It plays a fake song and has controls for BPM, chaos level, number of creatures and colors. You can also pass settings in the URL, for example `preview.html?chaos=chaos&count=10&bpm=150`.
+To work on the stage without Spotify, run `npm run compile` and open [dev/preview.html](dev/preview.html) in a browser. It plays a fake song with controls for tempo, chaos and colors. Try `preview.html?chaos=chaos&count=12`.
 
 ## Credits
 
@@ -69,4 +73,4 @@ Pixel font: Press Start 2P by CodeMan38 (SIL Open Font License, see `media/fonts
 
 ## License
 
-MIT, see [LICENSE](LICENSE). The bundled font keeps its own license (OFL).
+MIT, see [LICENSE](LICENSE).

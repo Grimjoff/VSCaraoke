@@ -72,7 +72,7 @@
 
 	function config() {
 		send({ type: 'config', creatureCount: +$('c-count').value, showVisualizer: $('c-viz').checked,
-			chaos: $('c-chaos').value, species: [], stageHeight: +$('c-stage').value });
+			chaos: $('c-chaos').value, species: [], stageHeight: +$('c-stage').value, lineFill: q.get('fill') ?? 'instant' });
 	}
 	function state() {
 		send({ type: 'state', isPlaying: playing, progressMs: progress, timestamp: Date.now() });

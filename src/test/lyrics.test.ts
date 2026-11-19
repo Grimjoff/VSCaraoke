@@ -13,6 +13,26 @@ suite('LRC parser', () => {
 		]);
 	});
 
+	test('parses enhanced LRC word timings and strips tags from text', () => {
+		const [line] = parseLrc('[00:10.00]<00:10.00>Watch <00:10.40>me <00:11.20>now');
+		assert.strictEqual(line.text, 'Watch me now');
+		assert.deepStrictEqual(line.words, [
+			{ timeMs: 10000, text: 'Watch ' },
+			{ timeMs: 10400, text: 'me ' },
+			{ timeMs: 11200, text: 'now' },
+		]);
+	});
+
+	test('text before the first word tag starts at the line time', () => {
+		const [line] = parseLrc('[00:05.00]Oh <00:05.80>yeah');
+		assert.strictEqual(line.text, 'Oh yeah');
+		assert.deepStrictEqual(line.words?.map(w => w.timeMs), [5000, 5800]);
+	});
+
+	test('plain lines have no words', () => {
+		assert.strictEqual(parseLrc('[00:01.00]Just a line')[0].words, undefined);
+	});
+
 	test('expands lines with multiple tags and keeps empty lines', () => {
 		const lines = parseLrc('[00:05.00][00:20.00]Chorus\n[00:10.00]');
 		assert.deepStrictEqual(lines.map(l => [l.timeMs, l.text]), [[5000, 'Chorus'], [10000, ''], [20000, 'Chorus']]);

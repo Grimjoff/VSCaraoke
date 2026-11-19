@@ -1,6 +1,6 @@
 {
   "name": "karaokeextension",
-  "displayName": "Karaoke",
+  "displayName": "VSCaraoke",
   "description": "Synced lyrics for what is playing on Spotify, with dancing pixel sproutlings.",
   "publisher": "grimjoff",
   "repository": {
@@ -8,6 +8,7 @@
     "url": "https://github.com/Grimjoff/VSCaraoke.git"
   },
   "license": "MIT",
+  "icon": "media/icon.png",
   "version": "0.1.0",
   "engines": {
     "vscode": "^1.107.0"
@@ -92,7 +93,12 @@
         "karaoke.spotifyClientId": {
           "type": "string",
           "default": "",
-          "markdownDescription": "Client ID of your Spotify developer app. Add `http://127.0.0.1:43821/callback` as a Redirect URI in the app settings."
+          "markdownDescription": "Client ID of your Spotify developer app. Add the URL from `#karaoke.redirectUri#` (default `http://127.0.0.1:43821/callback`) as a Redirect URI in the app settings."
+        },
+        "karaoke.redirectUri": {
+          "type": "string",
+          "default": "http://127.0.0.1:43821/callback",
+          "markdownDescription": "Callback URL for the Spotify sign-in. Must be `http://127.0.0.1:<port>/<path>` (or `[::1]`) and match a Redirect URI in your Spotify app **exactly**. Change the port if 43821 is taken on your machine."
         },
         "karaoke.creatureCount": {
           "type": "number",
@@ -148,6 +154,19 @@
           "minimum": 48,
           "maximum": 240,
           "description": "Height of the creature stage in pixels."
+        },
+        "karaoke.lineFill": {
+          "type": "string",
+          "enum": [
+            "instant",
+            "sweep"
+          ],
+          "default": "instant",
+          "enumDescriptions": [
+            "The current line lights up in the highlight color all at once.",
+            "The highlight color fills across the line as it is sung (word by word when the lyrics have word timings)."
+          ],
+          "description": "How the current lyric line is highlighted."
         }
       }
     },

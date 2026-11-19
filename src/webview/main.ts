@@ -3,7 +3,7 @@ import { Stage } from './stage';
 declare function acquireVsCodeApi(): { postMessage(msg: unknown): void };
 const vscode = acquireVsCodeApi();
 
-interface Line { timeMs: number; text: string }
+interface Line { timeMs: number; text: string; words?: { timeMs: number; text: string }[] }
 interface Track { id: string; title: string; artist: string; album: string; durationMs: number; artUrl?: string }
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -33,6 +33,7 @@ const s = {
 	lineEls: [] as HTMLElement[],
 	synced: false,
 	offsetMs: 0,
+	lineFill: 'instant' as string,
 	bpm: DEFAULT_BPM,
 	bpmSource: 'default' as 'default' | 'api' | 'tap',
 	beatPhase: 0,
@@ -112,11 +113,36 @@ function updateLyrics(ms: number): void {
 	// karaoke wipe on the active line
 	const cur = s.lineEls[idx];
 	if (cur) {
-		const start = s.lines[idx].timeMs;
-		const end = s.lines[idx + 1]?.timeMs ?? start + 4000;
-		const p = Math.max(0, Math.min(1, (t - start) / Math.max(1, Math.min(end - start, 6000) * 0.9)));
-		cur.style.setProperty('--p', `${(p * 100).toFixed(1)}%`);
+		const fill = s.lineFill === 'sweep' ? lineFill(idx, t) : 1;
+		cur.style.setProperty('--p', `${(fill * 100).toFixed(1)}%`);
 	}
+}
+
+/** How much of line i has been sung at time t (0..1). Uses word timings when the LRC has them. */
+function lineFill(i: number, t: number): number {
+	const line = s.lines[i];
+	const next = s.lines[i + 1]?.timeMs ?? line.timeMs + 4000;
+	const words = line.words;
+	if (words?.length) {
+		const total = words.reduce((n, w) => n + w.text.length, 0) || 1;
+		let done = 0;
+		for (let k = 0; k < words.length; k++) {
+			const w = words[k];
+			if (t < w.timeMs) {
+				break;
+			}
+			// last word: assume it is held at most 1.5s (or until the next line)
+			const end = words[k + 1]?.timeMs ?? Math.min(next, w.timeMs + 1500);
+			const f = Math.min(1, (t - w.timeMs) / Math.max(1, end - w.timeMs));
+			done += w.text.length * f;
+			if (f < 1) {
+				break;
+			}
+		}
+		return done / total;
+	}
+	// no word timings: spread evenly, finishing a bit before the next line
+	return Math.max(0, Math.min(1, (t - line.timeMs) / Math.max(1, Math.min(next - line.timeMs, 6000) * 0.9)));
 }
 
 // ---------- empty states ----------
@@ -255,11 +281,17 @@ window.addEventListener('message', ev => {
 			setTrack(m.track);
 			if (m.track) { renderLyrics([], 'loading'); showEmpty('Looking for lyrics…'); }
 			break;
-		case 'state':
+		case 'state': {
+			const incoming = m.progressMs + (Date.now() - m.timestamp);
+			const current = progress();
+			const drift = incoming - current;
+			// Small differences are poll jitter: ease toward them so the fill doesn't twitch.
+			// Big ones (seek, pause/resume, new track) snap immediately.
+			s.progressMs = s.isPlaying && m.isPlaying && Math.abs(drift) < 150 ? current + drift * 0.3 : incoming;
 			s.isPlaying = m.isPlaying;
-			s.progressMs = m.progressMs + (Date.now() - m.timestamp);
 			s.receivedAt = performance.now();
 			break;
+		}
 		case 'lyricsLoading':
 			if (m.trackId === s.track?.id) { showEmpty('Looking for lyrics…'); }
 			break;
@@ -283,6 +315,7 @@ window.addEventListener('message', ev => {
 			stage.setChaos(m.chaos);
 			stage.setCreatureCount(m.creatureCount);
 			stage.showVisualizer = m.showVisualizer;
+			s.lineFill = m.lineFill ?? 'instant';
 			break;
 		case 'tap':
 			tap();

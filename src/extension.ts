@@ -25,6 +25,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		chaos: config().get<string>('chaos', 'lively'),
 		species: config().get<string[]>('species', []),
 		stageHeight: config().get<number>('stageHeight', 112),
+		lineFill: config().get<string>('lineFill', 'instant'),
 	});
 	const sendOffset = () => view.post({ type: 'offset', ms: config().get<number>('lyricsOffsetMs', 0) + sessionOffset });
 	const updateActive = () => player.setActive(view.visible && auth.isSignedIn);

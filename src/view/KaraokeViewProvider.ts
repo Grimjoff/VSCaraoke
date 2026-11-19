@@ -6,11 +6,11 @@ export type HostMessage =
 	| { type: 'auth'; signedIn: boolean }
 	| { type: 'track'; track?: { id: string; title: string; artist: string; album: string; durationMs: number; artUrl?: string } }
 	| { type: 'state'; isPlaying: boolean; progressMs: number; timestamp: number }
-	| { type: 'lyrics'; trackId: string; kind: string; lines: { timeMs: number; text: string }[]; source?: string }
+	| { type: 'lyrics'; trackId: string; kind: string; lines: { timeMs: number; text: string; words?: { timeMs: number; text: string }[] }[]; source?: string }
 	| { type: 'lyricsLoading'; trackId: string }
 	| { type: 'tempo'; trackId: string; bpm?: number }
 	| { type: 'offset'; ms: number }
-	| { type: 'config'; creatureCount: number; showVisualizer: boolean; chaos: string; species: string[]; stageHeight: number }
+	| { type: 'config'; creatureCount: number; showVisualizer: boolean; chaos: string; species: string[]; stageHeight: number; lineFill: string }
 	| { type: 'tap' };
 
 /** Messages the webview sends back. */

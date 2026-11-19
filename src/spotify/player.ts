@@ -58,9 +58,12 @@ export class SpotifyPlayer implements vscode.Disposable {
 				this.emit({ isPlaying: false, progressMs: 0, timestamp: Date.now() });
 				return;
 			}
+			const sentAt = Date.now();
 			const res = await fetch('https://api.spotify.com/v1/me/player/currently-playing?additional_types=episode', {
 				headers: { Authorization: `Bearer ${token}` },
 			});
+			// Spotify measured progress_ms somewhere during the round trip; the midpoint is the best guess.
+			const measuredAt = sentAt + (Date.now() - sentAt) / 2;
 			if (res.status === 204) {
 				this.emit({ isPlaying: false, progressMs: 0, timestamp: Date.now() });
 			} else if (res.status === 429) {
@@ -76,7 +79,7 @@ export class SpotifyPlayer implements vscode.Disposable {
 					durationMs: item.duration_ms,
 					artUrl: (item.album?.images ?? item.images ?? [])[0]?.url,
 				} : undefined;
-				this.emit({ track, isPlaying: !!j.is_playing, progressMs: j.progress_ms ?? 0, timestamp: Date.now() });
+				this.emit({ track, isPlaying: !!j.is_playing, progressMs: j.progress_ms ?? 0, timestamp: measuredAt });
 				next = j.is_playing ? 1000 : 4000;
 			}
 		} catch {

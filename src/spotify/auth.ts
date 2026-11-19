@@ -1,9 +1,8 @@
 import * as vscode from 'vscode';
 import * as http from 'http';
 import * as crypto from 'crypto';
+import { parseRedirect, Redirect } from './redirect';
 
-const PORT = 43821;
-const REDIRECT_URI = `http://127.0.0.1:${PORT}/callback`;
 const SCOPES = 'user-read-currently-playing user-read-playback-state';
 const TOKEN_KEY = 'karaoke.spotify.tokens';
 
@@ -24,10 +23,18 @@ export class SpotifyAuth {
 
 	constructor(private readonly secrets: vscode.SecretStorage) { }
 
-	static readonly redirectUri = REDIRECT_URI;
-
 	private get clientId(): string {
 		return vscode.workspace.getConfiguration('karaoke').get<string>('spotifyClientId', '').trim();
+	}
+
+	private get redirect(): Redirect | string {
+		return parseRedirect(vscode.workspace.getConfiguration('karaoke').get<string>('redirectUri', ''));
+	}
+
+	private async settingError(message: string, setting: string): Promise<void> {
+		if (await vscode.window.showErrorMessage(message, 'Open Settings')) {
+			void vscode.commands.executeCommand('workbench.action.openSettings', setting);
+		}
 	}
 
 	async load(): Promise<boolean> {
@@ -47,15 +54,15 @@ export class SpotifyAuth {
 	}
 
 	async signIn(): Promise<void> {
+		const redirect = this.redirect;
+		if (typeof redirect === 'string') {
+			return this.settingError(`Invalid "karaoke.redirectUri": ${redirect}`, 'karaoke.redirectUri');
+		}
 		const clientId = this.clientId;
 		if (!clientId) {
-			const pick = await vscode.window.showErrorMessage(
-				`Set "karaoke.spotifyClientId" first. Create an app at developer.spotify.com and add ${REDIRECT_URI} as a Redirect URI.`,
-				'Open Settings');
-			if (pick) {
-				vscode.commands.executeCommand('workbench.action.openSettings', 'karaoke.spotifyClientId');
-			}
-			return;
+			return this.settingError(
+				`Set "karaoke.spotifyClientId" first. Create an app at developer.spotify.com and add ${redirect.uri} as a Redirect URI.`,
+				'karaoke.spotifyClientId');
 		}
 		const verifier = b64url(crypto.randomBytes(64));
 		const challenge = b64url(crypto.createHash('sha256').update(verifier).digest());
@@ -63,8 +70,8 @@ export class SpotifyAuth {
 
 		const code = await new Promise<string>((resolve, reject) => {
 			const server = http.createServer((req, res) => {
-				const url = new URL(req.url ?? '/', REDIRECT_URI);
-				if (url.pathname !== '/callback') {
+				const url = new URL(req.url ?? '/', redirect.uri);
+				if (url.pathname !== redirect.path) {
 					res.writeHead(404).end();
 					return;
 				}
@@ -84,12 +91,17 @@ export class SpotifyAuth {
 				}
 			});
 			const timer = setTimeout(() => { server.close(); reject(new Error('Sign-in timed out')); }, 5 * 60_000);
-			server.on('error', reject);
-			server.listen(PORT, '127.0.0.1', () => {
+			server.on('error', (e: NodeJS.ErrnoException) => {
+				clearTimeout(timer);
+				reject(new Error(e.code === 'EADDRINUSE'
+					? `Port ${redirect.port} is already in use. Pick another port in "karaoke.redirectUri" and add the new URL to your Spotify app.`
+					: e.message));
+			});
+			server.listen(redirect.port, redirect.host, () => {
 				const p = new URLSearchParams({
 					client_id: clientId,
 					response_type: 'code',
-					redirect_uri: REDIRECT_URI,
+					redirect_uri: redirect.uri,
 					code_challenge_method: 'S256',
 					code_challenge: challenge,
 					scope: SCOPES,
@@ -102,7 +114,7 @@ export class SpotifyAuth {
 		await this.tokenRequest({
 			grant_type: 'authorization_code',
 			code,
-			redirect_uri: REDIRECT_URI,
+			redirect_uri: redirect.uri,
 			client_id: clientId,
 			code_verifier: verifier,
 		});
