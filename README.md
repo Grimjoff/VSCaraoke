@@ -29,7 +29,7 @@ Spotify wants every app to have its own key, so you'll need to make one. Spotify
    - **Redirect URI:** `http://127.0.0.1:43821/callback`
    - **API:** Web API
 2. Copy the app's **Client ID** into the `karaoke.spotifyClientId` setting.
-3. Open the **Karaoke** tab in the bottom panel (next to Terminal) and hit **Sign in to Spotify**.
+3. Open the **VSCaraoke** tab in the bottom panel (next to Terminal) and hit **Sign in to Spotify**.
 4. Play something and sing along (required)
 
 Port 43821 already taken for whatever reason? Set `karaoke.redirectUri` to another one, like `http://127.0.0.1:8888/callback`, and add that exact URL to your Spotify app instead.
@@ -51,8 +51,8 @@ Click the ⚙ in the panel's title bar to open all settings.
 
 ## When things are a little off
 
-- **Wrong lyrics?** Run **Karaoke: Search Lyrics Manually** and pick the right ones. VSCaraoke remembers your pick for that song.
-- **Lyrics a bit early or late?** **Karaoke: Show Lyrics Earlier / Later** shifts them in 250 ms steps.
+- **Wrong lyrics?** Run **VSCaraoke: Search Lyrics Manually** and pick the right ones. VSCaraoke remembers your pick for that song.
+- **Lyrics a bit early or late?** **VSCaraoke: Show Lyrics Earlier / Later** shifts them in 250 ms steps.
 - **Creatures dancing off-beat?** Some songs have no tempo info. Click the BPM label in the top right 3–4 times along with the beat to set it.
 
 ## How it works

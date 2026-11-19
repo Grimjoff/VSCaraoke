@@ -85,14 +85,14 @@ export class KaraokeViewProvider implements vscode.WebviewViewProvider, vscode.D
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>@font-face { font-family: 'PixelFont'; src: url('${font}') format('truetype'); }</style>
 <link rel="stylesheet" href="${style}">
-<title>Karaoke</title>
+<title>VSCaraoke</title>
 </head>
 <body>
 <div id="app">
 	<header id="header">
 		<img id="art" alt="" hidden>
 		<div id="meta">
-			<div id="title">KARAOKE</div>
+			<div id="title">VSCARAOKE</div>
 			<div id="artist"></div>
 			<div id="progress"><div id="progress-fill"></div></div>
 		</div>

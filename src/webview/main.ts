@@ -178,7 +178,7 @@ function setTrack(t?: Track): void {
 	s.bpm = DEFAULT_BPM;
 	s.bpmSource = 'default';
 	s.beatPhase = 0;
-	el.title.textContent = t?.title ?? 'KARAOKE';
+	el.title.textContent = t?.title ?? 'VSCARAOKE';
 	el.artist.textContent = t?.artist ?? '';
 	if (t?.artUrl) {
 		el.art.hidden = false;

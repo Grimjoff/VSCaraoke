@@ -1,7 +1,7 @@
 import { normalizeArtist, normalizeTitle } from './normalize';
 
 const BASE = 'https://lrclib.net/api';
-const HEADERS = { 'User-Agent': 'KaraokeExtension (VS Code extension)' };
+const HEADERS = { 'User-Agent': 'VSCaraoke (https://github.com/Grimjoff/VSCaraoke)' };
 
 export interface LrclibRecord {
 	id: number;

@@ -25,7 +25,7 @@
       "panel": [
         {
           "id": "karaoke-panel",
-          "title": "Karaoke",
+          "title": "VSCaraoke",
           "icon": "media/music.svg"
         }
       ]
@@ -43,52 +43,52 @@
       {
         "command": "karaoke.show",
         "title": "Show Lyrics Panel",
-        "category": "Karaoke"
+        "category": "VSCaraoke"
       },
       {
         "command": "karaoke.signIn",
         "title": "Sign in to Spotify",
-        "category": "Karaoke"
+        "category": "VSCaraoke"
       },
       {
         "command": "karaoke.signOut",
         "title": "Sign out of Spotify",
-        "category": "Karaoke"
+        "category": "VSCaraoke"
       },
       {
         "command": "karaoke.searchLyrics",
         "title": "Search Lyrics Manually",
-        "category": "Karaoke"
+        "category": "VSCaraoke"
       },
       {
         "command": "karaoke.reloadLyrics",
         "title": "Reload Lyrics",
-        "category": "Karaoke"
+        "category": "VSCaraoke"
       },
       {
         "command": "karaoke.lyricsEarlier",
         "title": "Show Lyrics Earlier (-250ms)",
-        "category": "Karaoke"
+        "category": "VSCaraoke"
       },
       {
         "command": "karaoke.lyricsLater",
         "title": "Show Lyrics Later (+250ms)",
-        "category": "Karaoke"
+        "category": "VSCaraoke"
       },
       {
         "command": "karaoke.tapTempo",
         "title": "Tap Tempo",
-        "category": "Karaoke"
+        "category": "VSCaraoke"
       },
       {
         "command": "karaoke.openSettings",
         "title": "Open Settings",
-        "category": "Karaoke",
+        "category": "VSCaraoke",
         "icon": "$(gear)"
       }
     ],
     "configuration": {
-      "title": "Karaoke",
+      "title": "VSCaraoke",
       "properties": {
         "karaoke.spotifyClientId": {
           "type": "string",
