@@ -21,6 +21,18 @@ Every bar they pick a new move: bob, hop, sway, wave, spin, stomp, headbang. Som
 
 **Click the dance floor** to give everyone a fresh paint job.
 
+## Install
+
+**Antigravity, Cursor, VSCodium and anything else that uses [Open VSX](https://open-vsx.org/extension/grimjoff/vscaraoke):** search for **VSCaraoke** in the Extensions view and hit Install. Updates come automatically.
+
+**Regular VS Code (or if search doesn't find it):**
+Not on Microsofts Marketplace yet (it's in the works), so for now you'll need to install manually: 
+
+1. Download the `.vsix` file from the [latest release](https://github.com/Grimjoff/VSCaraoke/releases/latest).
+2. In the Extensions view, click the `…` menu at the top and choose **Install from VSIX…**. Or just drag the file into the Extensions view.
+
+Installs from a `.vsix` don't update themselves, so check the releases page now and then for new versions if you are interested.
+
 ## Setup (about 3 minutes)
 
 Spotify wants every app to have its own key, so you'll need to make one. Spotify Premium is unfortunately required for this to work. If you have it, it is free:
@@ -65,7 +77,7 @@ Click the ⚙ in the panel's title bar to open all settings.
 
 The creatures are text grids in [src/webview/sprites.ts](src/webview/sprites.ts), one digit per color. Copy one, redraw it, and you have a new species.
 
-To work on the stage without Spotify, run `npm run compile` and open [dev/preview.html](dev/preview.html) in a browser. It plays a fake song with controls for tempo, chaos and colors. Try `preview.html?chaos=chaos&count=12`.
+To work on the stage without Spotify, run `npm run compile` and open [dev/preview.html](dev/preview.html) in a browser. It plays a fake song with controls for tempo, chaos and colors. Try `preview.html?chaos=chaos&count=12`. If you think others would like your own creatures, feel free to invite them to the main party with a pull request :\).
 
 ## Credits
 
