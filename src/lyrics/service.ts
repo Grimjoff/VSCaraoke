@@ -9,8 +9,8 @@ export interface LyricsResult {
 	source?: string;
 }
 
-const CACHE_KEY = 'karaoke.lyricsCache';
-const OVERRIDE_KEY = 'karaoke.lyricsOverrides';
+const CACHE_KEY = 'vscaraoke.lyricsCache';
+const OVERRIDE_KEY = 'vscaraoke.lyricsOverrides';
 const NOT_FOUND_TTL = 24 * 3600_000;
 const MAX_CACHE = 300;
 

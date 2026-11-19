@@ -4,7 +4,7 @@ import * as crypto from 'crypto';
 import { parseRedirect, Redirect } from './redirect';
 
 const SCOPES = 'user-read-currently-playing user-read-playback-state';
-const TOKEN_KEY = 'karaoke.spotify.tokens';
+const TOKEN_KEY = 'vscaraoke.spotify.tokens';
 
 interface Tokens {
 	accessToken: string;
@@ -24,11 +24,11 @@ export class SpotifyAuth {
 	constructor(private readonly secrets: vscode.SecretStorage) { }
 
 	private get clientId(): string {
-		return vscode.workspace.getConfiguration('karaoke').get<string>('spotifyClientId', '').trim();
+		return vscode.workspace.getConfiguration('vscaraoke').get<string>('spotifyClientId', '').trim();
 	}
 
 	private get redirect(): Redirect | string {
-		return parseRedirect(vscode.workspace.getConfiguration('karaoke').get<string>('redirectUri', ''));
+		return parseRedirect(vscode.workspace.getConfiguration('vscaraoke').get<string>('redirectUri', ''));
 	}
 
 	private async settingError(message: string, setting: string): Promise<void> {
@@ -56,13 +56,13 @@ export class SpotifyAuth {
 	async signIn(): Promise<void> {
 		const redirect = this.redirect;
 		if (typeof redirect === 'string') {
-			return this.settingError(`Invalid "karaoke.redirectUri": ${redirect}`, 'karaoke.redirectUri');
+			return this.settingError(`Invalid "vscaraoke.redirectUri": ${redirect}`, 'vscaraoke.redirectUri');
 		}
 		const clientId = this.clientId;
 		if (!clientId) {
 			return this.settingError(
-				`Set "karaoke.spotifyClientId" first. Create an app at developer.spotify.com and add ${redirect.uri} as a Redirect URI.`,
-				'karaoke.spotifyClientId');
+				`Set "vscaraoke.spotifyClientId" first. Create an app at developer.spotify.com and add ${redirect.uri} as a Redirect URI.`,
+				'vscaraoke.spotifyClientId');
 		}
 		const verifier = b64url(crypto.randomBytes(64));
 		const challenge = b64url(crypto.createHash('sha256').update(verifier).digest());
@@ -94,7 +94,7 @@ export class SpotifyAuth {
 			server.on('error', (e: NodeJS.ErrnoException) => {
 				clearTimeout(timer);
 				reject(new Error(e.code === 'EADDRINUSE'
-					? `Port ${redirect.port} is already in use. Pick another port in "karaoke.redirectUri" and add the new URL to your Spotify app.`
+					? `Port ${redirect.port} is already in use. Pick another port in "vscaraoke.redirectUri" and add the new URL to your Spotify app.`
 					: e.message));
 			});
 			server.listen(redirect.port, redirect.host, () => {

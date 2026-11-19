@@ -19,8 +19,8 @@ export type ViewMessage =
 	| { type: 'signIn' }
 	| { type: 'searchLyrics' };
 
-export class KaraokeViewProvider implements vscode.WebviewViewProvider, vscode.Disposable {
-	public static readonly viewType = 'karaoke.lyricsView';
+export class VSCaraokeViewProvider implements vscode.WebviewViewProvider, vscode.Disposable {
+	public static readonly viewType = 'vscaraoke.lyricsView';
 	private view?: vscode.WebviewView;
 	private readonly disposables: vscode.Disposable[] = [];
 
@@ -61,7 +61,7 @@ export class KaraokeViewProvider implements vscode.WebviewViewProvider, vscode.D
 		if (this.view) {
 			this.view.show(true);
 		} else {
-			void vscode.commands.executeCommand(`${KaraokeViewProvider.viewType}.focus`);
+			void vscode.commands.executeCommand(`${VSCaraokeViewProvider.viewType}.focus`);
 		}
 	}
 

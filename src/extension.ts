@@ -5,19 +5,19 @@ import { LyricsService, toResult } from './lyrics/service';
 import { lrclibSearch } from './lyrics/lrclib';
 import { normalizeArtist, normalizeTitle } from './lyrics/normalize';
 import { fetchTempo } from './tempo/reccobeats';
-import { KaraokeViewProvider } from './view/KaraokeViewProvider';
+import { VSCaraokeViewProvider } from './view/VSCaraokeViewProvider';
 
 export async function activate(context: vscode.ExtensionContext) {
 	const auth = new SpotifyAuth(context.secrets);
 	const player = new SpotifyPlayer(auth);
 	const lyrics = new LyricsService(context.globalState);
-	const view = new KaraokeViewProvider(context.extensionUri);
+	const view = new VSCaraokeViewProvider(context.extensionUri);
 
 	let currentTrack: TrackInfo | undefined;
 	let sessionOffset = 0;
 	const tempoCache = new Map<string, number | undefined>();
 
-	const config = () => vscode.workspace.getConfiguration('karaoke');
+	const config = () => vscode.workspace.getConfiguration('vscaraoke');
 	const sendConfig = () => view.post({
 		type: 'config',
 		creatureCount: config().get<number>('creatureCount', 6),
@@ -74,40 +74,40 @@ export async function activate(context: vscode.ExtensionContext) {
 				sendOffset();
 				player.refresh();
 			} else if (m.type === 'signIn') {
-				void vscode.commands.executeCommand('karaoke.signIn');
+				void vscode.commands.executeCommand('vscaraoke.signIn');
 			} else if (m.type === 'searchLyrics') {
-				void vscode.commands.executeCommand('karaoke.searchLyrics');
+				void vscode.commands.executeCommand('vscaraoke.searchLyrics');
 			}
 		}),
 		vscode.workspace.onDidChangeConfiguration(e => {
-			if (e.affectsConfiguration('karaoke')) {
+			if (e.affectsConfiguration('vscaraoke')) {
 				sendConfig();
 				sendOffset();
 			}
 		}),
-		vscode.window.registerWebviewViewProvider(KaraokeViewProvider.viewType, view, {
+		vscode.window.registerWebviewViewProvider(VSCaraokeViewProvider.viewType, view, {
 			webviewOptions: { retainContextWhenHidden: true },
 		}),
-		vscode.commands.registerCommand('karaoke.show', () => view.reveal()),
-		vscode.commands.registerCommand('karaoke.openSettings', () =>
-			vscode.commands.executeCommand('workbench.action.openSettings', 'karaoke.')),
-		vscode.commands.registerCommand('karaoke.signIn', async () => {
+		vscode.commands.registerCommand('vscaraoke.show', () => view.reveal()),
+		vscode.commands.registerCommand('vscaraoke.openSettings', () =>
+			vscode.commands.executeCommand('workbench.action.openSettings', 'vscaraoke.')),
+		vscode.commands.registerCommand('vscaraoke.signIn', async () => {
 			try {
 				await auth.signIn();
 			} catch (e) {
 				vscode.window.showErrorMessage(`Spotify sign-in failed: ${e instanceof Error ? e.message : e}`);
 			}
 		}),
-		vscode.commands.registerCommand('karaoke.signOut', () => auth.signOut()),
-		vscode.commands.registerCommand('karaoke.reloadLyrics', () => {
+		vscode.commands.registerCommand('vscaraoke.signOut', () => auth.signOut()),
+		vscode.commands.registerCommand('vscaraoke.reloadLyrics', () => {
 			if (currentTrack) {
 				void loadLyrics(currentTrack, true);
 			}
 		}),
-		vscode.commands.registerCommand('karaoke.lyricsEarlier', () => { sessionOffset -= 250; sendOffset(); }),
-		vscode.commands.registerCommand('karaoke.lyricsLater', () => { sessionOffset += 250; sendOffset(); }),
-		vscode.commands.registerCommand('karaoke.tapTempo', () => view.post({ type: 'tap' })),
-		vscode.commands.registerCommand('karaoke.searchLyrics', async () => {
+		vscode.commands.registerCommand('vscaraoke.lyricsEarlier', () => { sessionOffset -= 250; sendOffset(); }),
+		vscode.commands.registerCommand('vscaraoke.lyricsLater', () => { sessionOffset += 250; sendOffset(); }),
+		vscode.commands.registerCommand('vscaraoke.tapTempo', () => view.post({ type: 'tap' })),
+		vscode.commands.registerCommand('vscaraoke.searchLyrics', async () => {
 			const track = currentTrack;
 			const query = await vscode.window.showInputBox({
 				prompt: 'Search LRCLIB for lyrics',

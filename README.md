@@ -28,11 +28,11 @@ Spotify wants every app to have its own key, so you'll need to make one. Spotify
 1. Go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) and create an app.
    - **Redirect URI:** `http://127.0.0.1:43821/callback`
    - **API:** Web API
-2. Copy the app's **Client ID** into the `karaoke.spotifyClientId` setting.
+2. Copy the app's **Client ID** into the `vscaraoke.spotifyClientId` setting.
 3. Open the **VSCaraoke** tab in the bottom panel (next to Terminal) and hit **Sign in to Spotify**.
 4. Play something and sing along (required)
 
-Port 43821 already taken for whatever reason? Set `karaoke.redirectUri` to another one, like `http://127.0.0.1:8888/callback`, and add that exact URL to your Spotify app instead.
+Port 43821 already taken for whatever reason? Set `vscaraoke.redirectUri` to another one, like `http://127.0.0.1:8888/callback`, and add that exact URL to your Spotify app instead.
 
 ## Make it yours
 
@@ -40,14 +40,14 @@ Click the ⚙ in the panel's title bar to open all settings.
 
 | Setting | Default | |
 |---|---|---|
-| `karaoke.chaos` | `lively` | `calm`, `lively` or `chaos`. `chaos` comes with screen shake. You've been warned. |
-| `karaoke.creatureCount` | `6` | Up to 12 dancers. |
-| `karaoke.species` | all | Pick your favorites, e.g. `["wisp", "beepbox"]`. |
-| `karaoke.lineFill` | `instant` | `instant` lights up the whole line. `sweep` fills it as it's sung. |
-| `karaoke.showVisualizer` | on | The bars behind the crowd. |
-| `karaoke.stageHeight` | `112` | More room for the dance floor. |
-| `karaoke.lyricsOffsetMs` | `0` | Lyrics consistently early or late? Nudge them here. |
-| `karaoke.redirectUri` | `http://127.0.0.1:43821/callback` | Only if you need a different sign-in port. |
+| `vscaraoke.chaos` | `lively` | `calm`, `lively` or `chaos`. `chaos` comes with screen shake. You've been warned. |
+| `vscaraoke.creatureCount` | `6` | Up to 12 dancers. |
+| `vscaraoke.species` | all | Pick your favorites, e.g. `["wisp", "beepbox"]`. |
+| `vscaraoke.lineFill` | `instant` | `instant` lights up the whole line. `sweep` fills it as it's sung. |
+| `vscaraoke.showVisualizer` | on | The bars behind the crowd. |
+| `vscaraoke.stageHeight` | `112` | More room for the dance floor. |
+| `vscaraoke.lyricsOffsetMs` | `0` | Lyrics consistently early or late? Nudge them here. |
+| `vscaraoke.redirectUri` | `http://127.0.0.1:43821/callback` | Only if you need a different sign-in port. |
 
 ## When things are a little off
 

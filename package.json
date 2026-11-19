@@ -1,5 +1,5 @@
 {
-  "name": "karaokeextension",
+  "name": "vscaraoke",
   "displayName": "VSCaraoke",
   "description": "Synced lyrics for what is playing on Spotify, with dancing pixel sproutlings.",
   "publisher": "grimjoff",
@@ -24,64 +24,64 @@
     "viewsContainers": {
       "panel": [
         {
-          "id": "karaoke-panel",
+          "id": "vscaraoke-panel",
           "title": "VSCaraoke",
           "icon": "media/music.svg"
         }
       ]
     },
     "views": {
-      "karaoke-panel": [
+      "vscaraoke-panel": [
         {
           "type": "webview",
-          "id": "karaoke.lyricsView",
+          "id": "vscaraoke.lyricsView",
           "name": "Lyrics"
         }
       ]
     },
     "commands": [
       {
-        "command": "karaoke.show",
+        "command": "vscaraoke.show",
         "title": "Show Lyrics Panel",
         "category": "VSCaraoke"
       },
       {
-        "command": "karaoke.signIn",
+        "command": "vscaraoke.signIn",
         "title": "Sign in to Spotify",
         "category": "VSCaraoke"
       },
       {
-        "command": "karaoke.signOut",
+        "command": "vscaraoke.signOut",
         "title": "Sign out of Spotify",
         "category": "VSCaraoke"
       },
       {
-        "command": "karaoke.searchLyrics",
+        "command": "vscaraoke.searchLyrics",
         "title": "Search Lyrics Manually",
         "category": "VSCaraoke"
       },
       {
-        "command": "karaoke.reloadLyrics",
+        "command": "vscaraoke.reloadLyrics",
         "title": "Reload Lyrics",
         "category": "VSCaraoke"
       },
       {
-        "command": "karaoke.lyricsEarlier",
+        "command": "vscaraoke.lyricsEarlier",
         "title": "Show Lyrics Earlier (-250ms)",
         "category": "VSCaraoke"
       },
       {
-        "command": "karaoke.lyricsLater",
+        "command": "vscaraoke.lyricsLater",
         "title": "Show Lyrics Later (+250ms)",
         "category": "VSCaraoke"
       },
       {
-        "command": "karaoke.tapTempo",
+        "command": "vscaraoke.tapTempo",
         "title": "Tap Tempo",
         "category": "VSCaraoke"
       },
       {
-        "command": "karaoke.openSettings",
+        "command": "vscaraoke.openSettings",
         "title": "Open Settings",
         "category": "VSCaraoke",
         "icon": "$(gear)"
@@ -90,34 +90,34 @@
     "configuration": {
       "title": "VSCaraoke",
       "properties": {
-        "karaoke.spotifyClientId": {
+        "vscaraoke.spotifyClientId": {
           "type": "string",
           "default": "",
-          "markdownDescription": "Client ID of your Spotify developer app. Add the URL from `#karaoke.redirectUri#` (default `http://127.0.0.1:43821/callback`) as a Redirect URI in the app settings."
+          "markdownDescription": "Client ID of your Spotify developer app. Add the URL from `#vscaraoke.redirectUri#` (default `http://127.0.0.1:43821/callback`) as a Redirect URI in the app settings."
         },
-        "karaoke.redirectUri": {
+        "vscaraoke.redirectUri": {
           "type": "string",
           "default": "http://127.0.0.1:43821/callback",
           "markdownDescription": "Callback URL for the Spotify sign-in. Must be `http://127.0.0.1:<port>/<path>` (or `[::1]`) and match a Redirect URI in your Spotify app **exactly**. Change the port if 43821 is taken on your machine."
         },
-        "karaoke.creatureCount": {
+        "vscaraoke.creatureCount": {
           "type": "number",
           "default": 6,
           "minimum": 0,
           "maximum": 12,
           "description": "Number of dancing creatures on the stage."
         },
-        "karaoke.showVisualizer": {
+        "vscaraoke.showVisualizer": {
           "type": "boolean",
           "default": true,
           "description": "Show the beat-driven bar visualizer behind the sproutlings."
         },
-        "karaoke.lyricsOffsetMs": {
+        "vscaraoke.lyricsOffsetMs": {
           "type": "number",
           "default": 0,
           "description": "Global lyrics offset in milliseconds. Positive values show lyrics later."
         },
-        "karaoke.chaos": {
+        "vscaraoke.chaos": {
           "type": "string",
           "enum": [
             "calm",
@@ -132,7 +132,7 @@
           ],
           "description": "How messy the stage gets."
         },
-        "karaoke.species": {
+        "vscaraoke.species": {
           "type": "array",
           "items": {
             "type": "string",
@@ -148,14 +148,14 @@
           "uniqueItems": true,
           "description": "Which creatures may appear. Empty = all of them."
         },
-        "karaoke.stageHeight": {
+        "vscaraoke.stageHeight": {
           "type": "number",
           "default": 112,
           "minimum": 48,
           "maximum": 240,
           "description": "Height of the creature stage in pixels."
         },
-        "karaoke.lineFill": {
+        "vscaraoke.lineFill": {
           "type": "string",
           "enum": [
             "instant",
@@ -173,8 +173,8 @@
     "menus": {
       "view/title": [
         {
-          "command": "karaoke.openSettings",
-          "when": "view == karaoke.lyricsView",
+          "command": "vscaraoke.openSettings",
+          "when": "view == vscaraoke.lyricsView",
           "group": "navigation"
         }
       ]
