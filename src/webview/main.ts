@@ -167,8 +167,8 @@ function setTrack(t?: Track): void {
 
 function updateBpmLabel(): void {
 	el.bpm.textContent = s.track ? `${Math.round(s.bpm)}${s.bpmSource === 'default' ? '?' : ''} BPM` : '';
-	el.bpm.title = s.bpmSource === 'default' ? 'Tempo unknown – click the stage on the beat to tap it'
-		: s.bpmSource === 'tap' ? 'Tapped tempo' : 'Tempo from ReccoBeats';
+	el.bpm.title = (s.bpmSource === 'default' ? 'Tempo unknown.' : s.bpmSource === 'tap' ? 'Tapped tempo.' : 'Tempo from ReccoBeats.')
+		+ ' Click here on the beat (3+ times) to tap it.';
 }
 
 /** Samples album art and returns a few distinct, saturated hues. */
@@ -228,10 +228,19 @@ function tap(): void {
 		s.beatPhase = Math.round(raw) - raw;
 		updateBpmLabel();
 	}
-	el.stage.classList.add('tapped');
-	setTimeout(() => el.stage.classList.remove('tapped'), 80);
+	el.bpm.classList.add('tapped');
+	setTimeout(() => el.bpm.classList.remove('tapped'), 80);
 }
-el.stage.addEventListener('click', tap);
+el.bpm.addEventListener('click', tap);
+
+// ---------- dance floor ----------
+el.stage.addEventListener('click', () => {
+	const hues = stage.shuffleColors();
+	const hue = hues[Math.floor(Math.random() * hues.length)];
+	el.stage.style.setProperty('--flash', `hsl(${hue} 85% 60%)`);
+	el.stage.classList.add('flash');
+	setTimeout(() => el.stage.classList.remove('flash'), 80);
+});
 
 // ---------- messages ----------
 window.addEventListener('message', ev => {
@@ -269,6 +278,9 @@ window.addEventListener('message', ev => {
 			s.active = -2; // force re-layout
 			break;
 		case 'config':
+			el.stage.style.height = `${Math.max(48, Math.min(240, m.stageHeight))}px`;
+			stage.setSpecies(m.species);
+			stage.setChaos(m.chaos);
 			stage.setCreatureCount(m.creatureCount);
 			stage.showVisualizer = m.showVisualizer;
 			break;

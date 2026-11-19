@@ -173,13 +173,17 @@ html, body {
 /* ---------- stage ---------- */
 #stage {
 	flex: none;
-	height: 66px;
+	height: 112px;
 	cursor: pointer;
 	border-top: 1px solid color-mix(in srgb, var(--fg) 8%, transparent);
 	background: linear-gradient(transparent, color-mix(in srgb, var(--accent) 7%, transparent));
 }
 
-#stage.tapped { background: color-mix(in srgb, var(--accent) 18%, transparent); }
+#stage.flash { background: color-mix(in srgb, var(--flash, var(--accent)) 22%, transparent); }
+
+#bpm { cursor: pointer; padding: 3px 4px; user-select: none; }
+#bpm:hover { color: var(--accent); }
+#bpm.tapped { background: color-mix(in srgb, var(--accent) 30%, transparent); }
 
 #stage-canvas {
 	display: block;

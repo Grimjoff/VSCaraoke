@@ -10,7 +10,7 @@ export type HostMessage =
 	| { type: 'lyricsLoading'; trackId: string }
 	| { type: 'tempo'; trackId: string; bpm?: number }
 	| { type: 'offset'; ms: number }
-	| { type: 'config'; creatureCount: number; showVisualizer: boolean }
+	| { type: 'config'; creatureCount: number; showVisualizer: boolean; chaos: string; species: string[]; stageHeight: number }
 	| { type: 'tap' };
 
 /** Messages the webview sends back. */
@@ -96,7 +96,7 @@ export class KaraokeViewProvider implements vscode.WebviewViewProvider, vscode.D
 			<div id="artist"></div>
 			<div id="progress"><div id="progress-fill"></div></div>
 		</div>
-		<div id="bpm" title="Click the stage to tap the tempo"></div>
+		<div id="bpm" title="Click on the beat to tap the tempo"></div>
 	</header>
 	<main id="lyrics-wrap">
 		<div id="lyrics"></div>
@@ -105,7 +105,7 @@ export class KaraokeViewProvider implements vscode.WebviewViewProvider, vscode.D
 			<button id="empty-btn" hidden></button>
 		</div>
 	</main>
-	<footer id="stage" title="Click to tap the tempo">
+	<footer id="stage" title="Click to shuffle colors">
 		<canvas id="stage-canvas"></canvas>
 	</footer>
 </div>

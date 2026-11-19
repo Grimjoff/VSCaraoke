@@ -20,8 +20,11 @@ export async function activate(context: vscode.ExtensionContext) {
 	const config = () => vscode.workspace.getConfiguration('karaoke');
 	const sendConfig = () => view.post({
 		type: 'config',
-		creatureCount: config().get<number>('creatureCount', 4),
+		creatureCount: config().get<number>('creatureCount', 6),
 		showVisualizer: config().get<boolean>('showVisualizer', true),
+		chaos: config().get<string>('chaos', 'lively'),
+		species: config().get<string[]>('species', []),
+		stageHeight: config().get<number>('stageHeight', 112),
 	});
 	const sendOffset = () => view.post({ type: 'offset', ms: config().get<number>('lyricsOffsetMs', 0) + sessionOffset });
 	const updateActive = () => player.setActive(view.visible && auth.isSignedIn);
@@ -85,6 +88,8 @@ export async function activate(context: vscode.ExtensionContext) {
 			webviewOptions: { retainContextWhenHidden: true },
 		}),
 		vscode.commands.registerCommand('karaoke.show', () => view.reveal()),
+		vscode.commands.registerCommand('karaoke.openSettings', () =>
+			vscode.commands.executeCommand('workbench.action.openSettings', 'karaoke.')),
 		vscode.commands.registerCommand('karaoke.signIn', async () => {
 			try {
 				await auth.signIn();

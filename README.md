@@ -20,7 +20,7 @@ A VS Code panel that shows time-synced lyrics for whatever is playing on Spotify
   4. Unsynced plain lyrics.
 
   Results are cached per track.
-- **Tempo:** comes from [ReccoBeats](https://reccobeats.com) when the song is in their database. Spotify no longer provides audio features to new apps. If the tempo is unknown, click the stage in time with the music (3+ taps) to set it. Tapping also lines the beat up with the song.
+- **Tempo:** comes from [ReccoBeats](https://reccobeats.com) when the song is in their database. Spotify no longer provides audio features to new apps. If the tempo is unknown, click the BPM label in the header in time with the music (3+ taps) to set it. Tapping also lines the beat up with the song.
 - **Visualizer:** this is simulated, not real audio. VS Code webviews can't access system audio, so the bars and dancers follow the beat clock instead of an FFT.
 
 ## Commands (`Karaoke: …`)
@@ -30,12 +30,38 @@ A VS Code panel that shows time-synced lyrics for whatever is playing on Spotify
 | Search Lyrics Manually | Pick the right LRCLIB entry when the automatic match is wrong. The choice is remembered for that track. |
 | Show Lyrics Earlier / Later | Shift lyric timing in 250 ms steps (for this track only). |
 | Reload Lyrics | Ignore the cache and look the lyrics up again. |
-| Tap Tempo | Same as clicking the stage. |
+| Tap Tempo | Same as clicking the BPM label. |
 | Sign in / Sign out of Spotify | |
 
 ## Settings
 
-`karaoke.creatureCount` (0–6), `karaoke.showVisualizer`, `karaoke.lyricsOffsetMs` (global offset; positive values show lyrics later).
+| Setting | Default | What it does |
+|---|---|---|
+| `karaoke.chaos` | `lively` | How messy the stage gets: `calm`, `lively` or `chaos`. |
+| `karaoke.creatureCount` | 6 | How many dancers (0–12). |
+| `karaoke.species` | all | Which creatures can appear: `sproutling`, `capling`, `wisp`, `beepbox`, `dribble`. |
+| `karaoke.stageHeight` | 112 | Height of the stage in pixels. |
+| `karaoke.showVisualizer` | on | Bars behind the dancers. |
+| `karaoke.lyricsOffsetMs` | 0 | Global lyric offset. Positive values show lyrics later. |
+
+## The stage
+
+- **sproutling:** round blob with a leaf.
+- **capling:** little mushroom.
+- **wisp:** floating ghost with a wiggly tail.
+- **beepbox:** robot with a screen face and a blinking antenna.
+- **dribble:** slime drop.
+- **skitter:** bug that runs around on its own. You don't pick these; the chaos level decides how many there are.
+
+Click the stage to give every creature a new random color. A new song switches back to colors taken from the album art.
+
+Every bar, each dancer picks a new move. Moves include bob, hop, sway, wave, cheer, spin, stomp and headbang. Wisps do loops instead of hopping. On higher chaos levels dancers also leap across the stage or trip and lie dazed for a few beats. Extras: music notes, hearts, dust puffs, confetti every 8 bars, and screen shake on `chaos`.
+
+Sprites are text grids in [src/webview/sprites.ts](src/webview/sprites.ts), one digit per palette slot (outline, body, highlight, shade, eye, accent and so on). To make a new creature, copy one of them and redraw it.
+
+### Preview without Spotify
+
+Run `npm run compile`, then open [dev/preview.html](dev/preview.html) in a browser. It plays a fake song and has controls for BPM, chaos level, number of creatures and colors. You can also pass settings in the URL, for example `preview.html?chaos=chaos&count=10&bpm=150`.
 
 ## Credits
 

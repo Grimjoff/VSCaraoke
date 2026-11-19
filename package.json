@@ -2,9 +2,14 @@
   "name": "karaokeextension",
   "displayName": "Karaoke",
   "description": "Synced lyrics for what is playing on Spotify, with dancing pixel sproutlings.",
-  "version": "0.0.1",
+  "publisher": "grimjoff",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Grimjoff/VScodeKaraoke.git"
+  },
+  "version": "0.1.0",
   "engines": {
-    "vscode": "^1.90.0"
+    "vscode": "^1.107.0"
   },
   "categories": [
     "Other"
@@ -72,6 +77,12 @@
         "command": "karaoke.tapTempo",
         "title": "Tap Tempo",
         "category": "Karaoke"
+      },
+      {
+        "command": "karaoke.openSettings",
+        "title": "Open Settings",
+        "category": "Karaoke",
+        "icon": "$(gear)"
       }
     ],
     "configuration": {
@@ -84,10 +95,10 @@
         },
         "karaoke.creatureCount": {
           "type": "number",
-          "default": 4,
+          "default": 6,
           "minimum": 0,
-          "maximum": 6,
-          "description": "Number of dancing sproutlings on the stage."
+          "maximum": 12,
+          "description": "Number of dancing creatures on the stage."
         },
         "karaoke.showVisualizer": {
           "type": "boolean",
@@ -98,8 +109,55 @@
           "type": "number",
           "default": 0,
           "description": "Global lyrics offset in milliseconds. Positive values show lyrics later."
+        },
+        "karaoke.chaos": {
+          "type": "string",
+          "enum": [
+            "calm",
+            "lively",
+            "chaos"
+          ],
+          "default": "lively",
+          "enumDescriptions": [
+            "Gentle dancing, few particles, no bugs.",
+            "Wandering, leaps, the odd stumble, confetti, a couple of bugs.",
+            "Everything, all the time. Screen shake included."
+          ],
+          "description": "How messy the stage gets."
+        },
+        "karaoke.species": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "sproutling",
+              "capling",
+              "wisp",
+              "beepbox",
+              "dribble"
+            ]
+          },
+          "default": [],
+          "uniqueItems": true,
+          "description": "Which creatures may appear. Empty = all of them."
+        },
+        "karaoke.stageHeight": {
+          "type": "number",
+          "default": 112,
+          "minimum": 48,
+          "maximum": 240,
+          "description": "Height of the creature stage in pixels."
         }
       }
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "karaoke.openSettings",
+          "when": "view == karaoke.lyricsView",
+          "group": "navigation"
+        }
+      ]
     }
   },
   "scripts": {
@@ -119,7 +177,7 @@
   "devDependencies": {
     "@types/mocha": "^10.0.10",
     "@types/node": "24.x",
-    "@types/vscode": "^1.140.0",
+    "@types/vscode": "~1.107.0",
     "@vscode/test-cli": "^0.0.15",
     "@vscode/test-electron": "^3.0.0",
     "esbuild": "^0.28.1",

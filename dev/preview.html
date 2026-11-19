@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<!--
+	Standalone preview of the Karaoke webview, no VS Code or Spotify needed.
+	Build first (npm run compile or npm run watch), then open this file in a browser.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Karaoke Preview</title>
+<style>
+	@font-face { font-family: 'PixelFont'; src: url('../media/fonts/PressStart2P-Regular.ttf') format('truetype'); }
+	:root {
+		--vscode-panel-background: #1e1e24;
+		--vscode-foreground: #d8d8e0;
+		--vscode-descriptionForeground: #8a8a99;
+		--vscode-button-background: #3a5fcd;
+		--vscode-button-foreground: #fff;
+		--vscode-font-family: system-ui, sans-serif;
+	}
+	#frame { width: min(900px, 100%); height: 340px; margin: 0 auto; border: 1px solid #333; resize: both; overflow: hidden; }
+	#frame #app { height: 100%; }
+	#controls { font: 12px system-ui, sans-serif; color: #ccc; background: #111; padding: 8px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+	#controls label { display: flex; gap: 4px; align-items: center; }
+	body { background: #111; }
+</style>
+<link rel="stylesheet" href="../media/webview.css">
+</head>
+<body>
+<div id="controls">
+	<label>BPM <input id="c-bpm" type="number" value="120" min="40" max="220" style="width:56px"></label>
+	<label>Creatures <input id="c-count" type="range" min="0" max="12" value="6"></label>
+	<label>Chaos
+		<select id="c-chaos"><option>calm</option><option selected>lively</option><option>chaos</option></select>
+	</label>
+	<label>Stage <input id="c-stage" type="range" min="48" max="240" value="112"></label>
+	<label><input id="c-viz" type="checkbox" checked> Visualizer</label>
+	<button id="c-play">Pause</button>
+	<button id="c-art">Random colors</button>
+</div>
+<div id="frame">
+<div id="app">
+	<header id="header">
+		<img id="art" alt="" hidden>
+		<div id="meta">
+			<div id="title">KARAOKE</div>
+			<div id="artist"></div>
+			<div id="progress"><div id="progress-fill"></div></div>
+		</div>
+		<div id="bpm"></div>
+	</header>
+	<main id="lyrics-wrap">
+		<div id="lyrics"></div>
+		<div id="empty" hidden>
+			<div id="empty-text"></div>
+			<button id="empty-btn" hidden></button>
+		</div>
+	</main>
+	<footer id="stage"><canvas id="stage-canvas"></canvas></footer>
+</div>
+</div>
+<script>
+	window.acquireVsCodeApi = () => ({ postMessage: m => console.log('[to host]', m) });
+	const send = m => window.postMessage(m, '*');
+	const $ = id => document.getElementById(id);
+	const track = { id: 'demo', title: 'Pixel Party (Demo)', artist: 'The Sproutlings', album: 'Preview', durationMs: 180000 };
+	const lines = Array.from({ length: 60 }, (_, i) => ({
+		timeMs: i * 3000,
+		text: i % 7 === 6 ? '' : ['la la la, the creatures dance', 'bouncing on the beat tonight', 'a mushroom and a little ghost', 'beep boop goes the tiny bot', 'drip drop, never stop', 'everybody on the floor'][i % 6],
+	}));
+	let playing = true, progress = 0, last = performance.now();
+
+	function config() {
+		send({ type: 'config', creatureCount: +$('c-count').value, showVisualizer: $('c-viz').checked,
+			chaos: $('c-chaos').value, species: [], stageHeight: +$('c-stage').value });
+	}
+	function state() {
+		send({ type: 'state', isPlaying: playing, progressMs: progress, timestamp: Date.now() });
+	}
+
+	// e.g. preview.html?chaos=chaos&count=10&bpm=150
+	const q = new URLSearchParams(location.search);
+	if (q.has('chaos')) { $('c-chaos').value = q.get('chaos'); }
+	if (q.has('count')) { $('c-count').value = q.get('count'); }
+	if (q.has('bpm')) { $('c-bpm').value = q.get('bpm'); }
+
+	addEventListener('load', () => {
+		send({ type: 'auth', signedIn: true });
+		send({ type: 'track', track });
+		send({ type: 'lyrics', trackId: 'demo', kind: 'synced', lines });
+		send({ type: 'tempo', trackId: 'demo', bpm: +$('c-bpm').value });
+		config();
+		state();
+		setInterval(() => {
+			const now = performance.now();
+			if (playing) { progress = (progress + now - last) % track.durationMs; }
+			last = now;
+			state();
+		}, 1000);
+	});
+	['c-count', 'c-chaos', 'c-stage', 'c-viz'].forEach(id => $(id).addEventListener('input', config));
+	$('c-bpm').addEventListener('change', () => send({ type: 'tempo', trackId: 'demo', bpm: +$('c-bpm').value }));
+	$('c-play').addEventListener('click', () => {
+		playing = !playing;
+		$('c-play').textContent = playing ? 'Pause' : 'Play';
+		last = performance.now();
+		state();
+	});
+	$('c-art').addEventListener('click', () => {
+		const c = document.createElement('canvas');
+		c.width = c.height = 4;
+		const g = c.getContext('2d');
+		for (let i = 0; i < 16; i++) {
+			g.fillStyle = `hsl(${Math.random() * 360} 80% 55%)`;
+			g.fillRect(i % 4, i >> 2, 1, 1);
+		}
+		send({ type: 'track', track: { ...track, artUrl: c.toDataURL() } });
+		send({ type: 'lyrics', trackId: 'demo', kind: 'synced', lines });
+		send({ type: 'tempo', trackId: 'demo', bpm: +$('c-bpm').value });
+	});
+</script>
+<script src="../dist/webview.js"></script>
+</body>
+</html>
