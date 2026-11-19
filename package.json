@@ -1,23 +1,106 @@
 {
   "name": "karaokeextension",
-  "displayName": "KaraokeExtension",
-  "description": "",
+  "displayName": "Karaoke",
+  "description": "Synced lyrics for what is playing on Spotify, with dancing pixel sproutlings.",
   "version": "0.0.1",
   "engines": {
-    "vscode": "^1.140.0"
+    "vscode": "^1.90.0"
   },
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "panel": [
+        {
+          "id": "karaoke-panel",
+          "title": "Karaoke",
+          "icon": "media/music.svg"
+        }
+      ]
+    },
+    "views": {
+      "karaoke-panel": [
+        {
+          "type": "webview",
+          "id": "karaoke.lyricsView",
+          "name": "Lyrics"
+        }
+      ]
+    },
     "commands": [
       {
-        "command": "karaokeextension.helloWorld",
-        "title": "Hello World"
+        "command": "karaoke.show",
+        "title": "Show Lyrics Panel",
+        "category": "Karaoke"
+      },
+      {
+        "command": "karaoke.signIn",
+        "title": "Sign in to Spotify",
+        "category": "Karaoke"
+      },
+      {
+        "command": "karaoke.signOut",
+        "title": "Sign out of Spotify",
+        "category": "Karaoke"
+      },
+      {
+        "command": "karaoke.searchLyrics",
+        "title": "Search Lyrics Manually",
+        "category": "Karaoke"
+      },
+      {
+        "command": "karaoke.reloadLyrics",
+        "title": "Reload Lyrics",
+        "category": "Karaoke"
+      },
+      {
+        "command": "karaoke.lyricsEarlier",
+        "title": "Show Lyrics Earlier (-250ms)",
+        "category": "Karaoke"
+      },
+      {
+        "command": "karaoke.lyricsLater",
+        "title": "Show Lyrics Later (+250ms)",
+        "category": "Karaoke"
+      },
+      {
+        "command": "karaoke.tapTempo",
+        "title": "Tap Tempo",
+        "category": "Karaoke"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Karaoke",
+      "properties": {
+        "karaoke.spotifyClientId": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Client ID of your Spotify developer app. Add `http://127.0.0.1:43821/callback` as a Redirect URI in the app settings."
+        },
+        "karaoke.creatureCount": {
+          "type": "number",
+          "default": 4,
+          "minimum": 0,
+          "maximum": 6,
+          "description": "Number of dancing sproutlings on the stage."
+        },
+        "karaoke.showVisualizer": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the beat-driven bar visualizer behind the sproutlings."
+        },
+        "karaoke.lyricsOffsetMs": {
+          "type": "number",
+          "default": 0,
+          "description": "Global lyrics offset in milliseconds. Positive values show lyrics later."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
@@ -29,21 +112,21 @@
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
-    "check-types": "tsc --noEmit",
+    "check-types": "tsc --noEmit && tsc --noEmit -p tsconfig.webview.json",
     "lint": "eslint src",
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.140.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "24.x",
-    "typescript-eslint": "^8.61.1",
-    "eslint": "^10.5.0",
+    "@types/vscode": "^1.140.0",
+    "@vscode/test-cli": "^0.0.15",
+    "@vscode/test-electron": "^3.0.0",
     "esbuild": "^0.28.1",
+    "eslint": "^10.5.0",
     "npm-run-all": "^4.1.5",
     "typescript": "^6.0.3",
-    "@vscode/test-cli": "^0.0.15",
-    "@vscode/test-electron": "^3.0.0"
+    "typescript-eslint": "^8.61.1"
   },
   "overrides": {
     "diff": "^8.0.4",
