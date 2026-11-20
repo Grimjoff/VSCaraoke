@@ -25,10 +25,9 @@ Every bar they pick a new move: bob, hop, sway, wave, spin, stomp, headbang. Som
 
 ## Install
 
-**Antigravity, Cursor, VSCodium and anything else that uses [Open VSX](https://open-vsx.org/extension/grimjoff/vscaraoke):** search for **VSCaraoke** in the Extensions view and hit Install. Updates come automatically.
+Search for **VSCaraoke** in the Extensions view and hit Install. Updates come automatically. It's available on the [VS Code Marketplace]((https://marketplace.visualstudio.com/items?itemName=grimjoff.vscaraoke)) (VS Code) and the [Open VSX Marketplace](https://open-vsx.org/extension/grimjoff/vscaraoke) (Antigravity, Cursor and other forks).
 
-**Regular VS Code (or if search doesn't find it):**
-Not on Microsofts Marketplace yet (it's in the works), so for now you'll need to install manually: 
+**If you like human labor:**
 
 1. Download the `.vsix` file from the [latest release](https://github.com/Grimjoff/VSCaraoke/releases/latest).
 2. In the Extensions view, click the `…` menu at the top and choose **Install from VSIX…**. Or just drag the file into the Extensions view.
