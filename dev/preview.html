@@ -48,6 +48,8 @@
 			<div id="progress"><div id="progress-fill"></div></div>
 		</div>
 		<div id="bpm"></div>
+		<button id="signin-btn" class="hbtn" hidden>SIGN IN</button>
+		<button id="demo-btn" class="hbtn" hidden></button>
 	</header>
 	<main id="lyrics-wrap">
 		<div id="lyrics"></div>
@@ -60,7 +62,7 @@
 </div>
 </div>
 <script>
-	window.acquireVsCodeApi = () => ({ postMessage: m => console.log('[to host]', m) });
+	window.acquireVsCodeApi = () => ({ postMessage: m => console.log('[to host]', m), getState: () => undefined, setState: () => {} });
 	const send = m => window.postMessage(m, '*');
 	const $ = id => document.getElementById(id);
 	const track = { id: 'demo', title: 'Pixel Party (Demo)', artist: 'The Sproutlings', album: 'Preview', durationMs: 180000 };
@@ -72,19 +74,25 @@
 
 	function config() {
 		send({ type: 'config', creatureCount: +$('c-count').value, showVisualizer: $('c-viz').checked,
-			chaos: $('c-chaos').value, species: [], stageHeight: +$('c-stage').value, lineFill: q.get('fill') ?? 'instant' });
+			chaos: $('c-chaos').value, species: [], stageHeight: +$('c-stage').value, lineFill: q.get('fill') ?? 'instant', demoWhenIdle: q.get('demo') !== 'off' });
 	}
 	function state() {
 		send({ type: 'state', isPlaying: playing, progressMs: progress, timestamp: Date.now() });
 	}
 
 	// e.g. preview.html?chaos=chaos&count=10&bpm=150
+	// ?idle simulates "Spotify not playing / signed out" so the crew's demo song kicks in.
 	const q = new URLSearchParams(location.search);
 	if (q.has('chaos')) { $('c-chaos').value = q.get('chaos'); }
 	if (q.has('count')) { $('c-count').value = q.get('count'); }
 	if (q.has('bpm')) { $('c-bpm').value = q.get('bpm'); }
 
 	addEventListener('load', () => {
+		if (q.has('idle')) {
+			send({ type: 'auth', signedIn: false });
+			config();
+			return;
+		}
 		send({ type: 'auth', signedIn: true });
 		send({ type: 'track', track });
 		send({ type: 'lyrics', trackId: 'demo', kind: 'synced', lines });

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0
+
+- When Spotify is quiet, the crew performs a silent demo song, *Sproutling Shuffle*, with its own lyrics
+- REST / PARTY button to let the crew nap during the demo (remembered)
+- `vscaraoke.demoWhenIdle` setting to turn the demo off
+
 ## 0.1.0
 
 First release. 🎤

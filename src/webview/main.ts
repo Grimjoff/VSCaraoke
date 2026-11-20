@@ -1,6 +1,11 @@
 import { Stage } from './stage';
+import { DEMO_BPM, DEMO_HUES, DEMO_LINES, DEMO_TRACK } from './demo';
 
-declare function acquireVsCodeApi(): { postMessage(msg: unknown): void };
+declare function acquireVsCodeApi(): {
+	postMessage(msg: unknown): void;
+	getState(): { demoPaused?: boolean } | undefined;
+	setState(state: { demoPaused?: boolean }): void;
+};
 const vscode = acquireVsCodeApi();
 
 interface Line { timeMs: number; text: string; words?: { timeMs: number; text: string }[] }
@@ -13,6 +18,8 @@ const el = {
 	artist: $('artist'),
 	fill: $('progress-fill'),
 	bpm: $('bpm'),
+	demoBtn: $<HTMLButtonElement>('demo-btn'),
+	signinBtn: $<HTMLButtonElement>('signin-btn'),
 	wrap: $('lyrics-wrap'),
 	lyrics: $('lyrics'),
 	empty: $('empty'),
@@ -22,20 +29,41 @@ const el = {
 };
 
 const DEFAULT_BPM = 110;
+/** How long Spotify must be quiet before the demo takes over (avoids flicker on short pauses). */
+const DEMO_GRACE_MS = 3000;
 
-const s = {
+/** What Spotify reports. Kept even while the demo is on screen. */
+const real = {
 	signedIn: false,
 	track: undefined as Track | undefined,
 	isPlaying: false,
 	progressMs: 0,
 	receivedAt: performance.now(),
+	lyrics: undefined as { trackId: string; lines: Line[]; kind: string; source?: string } | undefined,
+	tempo: undefined as { trackId: string; bpm: number } | undefined,
+	// start almost "expired" so the demo appears ~1s after opening when nothing plays
+	lastPlayingAt: performance.now() - DEMO_GRACE_MS + 1000,
+};
+
+/** The silent demo song. */
+const demo = {
+	enabled: true,
+	paused: vscode.getState()?.demoPaused ?? false,
+	elapsed: 0,
+};
+
+let mode: 'spotify' | 'demo' = 'spotify';
+
+/** What is currently on screen. */
+const s = {
+	track: undefined as Track | undefined,
 	lines: [] as Line[],
 	lineEls: [] as HTMLElement[],
 	synced: false,
 	offsetMs: 0,
 	lineFill: 'instant' as string,
 	bpm: DEFAULT_BPM,
-	bpmSource: 'default' as 'default' | 'api' | 'tap',
+	bpmSource: 'default' as 'default' | 'api' | 'tap' | 'demo',
 	beatPhase: 0,
 	active: -1,
 	taps: [] as number[],
@@ -44,9 +72,17 @@ const s = {
 const stage = new Stage($<HTMLCanvasElement>('stage-canvas'));
 
 // ---------- clock ----------
+function realProgress(): number {
+	const p = real.progressMs + (real.isPlaying ? performance.now() - real.receivedAt : 0);
+	return real.track ? Math.min(p, real.track.durationMs) : p;
+}
+
 function progress(): number {
-	const p = s.progressMs + (s.isPlaying ? performance.now() - s.receivedAt : 0);
-	return s.track ? Math.min(p, s.track.durationMs) : p;
+	return mode === 'demo' ? demo.elapsed % DEMO_TRACK.durationMs : realProgress();
+}
+
+function playing(): boolean {
+	return mode === 'demo' ? !demo.paused : real.isPlaying && !!real.track;
 }
 
 function beats(ms: number): number {
@@ -90,7 +126,7 @@ function updateLyrics(ms: number): void {
 	if (!s.synced || s.lines.length === 0) {
 		return;
 	}
-	const t = ms - s.offsetMs;
+	const t = mode === 'demo' ? ms : ms - s.offsetMs;
 	let lo = 0, hi = s.lines.length - 1, idx = -1;
 	while (lo <= hi) {
 		const mid = (lo + hi) >> 1;
@@ -162,10 +198,13 @@ el.emptyBtn.addEventListener('click', () => {
 });
 
 function refreshEmpty(): void {
-	if (!s.signedIn) {
+	if (mode === 'demo') {
+		return;
+	}
+	if (!real.signedIn) {
 		renderLyrics([], 'none');
 		showEmpty('Connect Spotify to start singing along.', 'Sign in to Spotify', 'signIn');
-	} else if (!s.track) {
+	} else if (!real.track) {
 		el.lyrics.replaceChildren();
 		s.lines = [];
 		showEmpty('Nothing playing. The sproutlings are napping…');
@@ -193,8 +232,17 @@ function setTrack(t?: Track): void {
 
 function updateBpmLabel(): void {
 	el.bpm.textContent = s.track ? `${Math.round(s.bpm)}${s.bpmSource === 'default' ? '?' : ''} BPM` : '';
-	el.bpm.title = (s.bpmSource === 'default' ? 'Tempo unknown.' : s.bpmSource === 'tap' ? 'Tapped tempo.' : 'Tempo from ReccoBeats.')
+	el.bpm.title = (s.bpmSource === 'default' ? 'Tempo unknown.'
+		: s.bpmSource === 'tap' ? 'Tapped tempo.'
+			: s.bpmSource === 'demo' ? 'Demo tempo.' : 'Tempo from ReccoBeats.')
 		+ ' Click here on the beat (3+ times) to tap it.';
+}
+
+function updateHeaderButtons(): void {
+	el.demoBtn.hidden = mode !== 'demo';
+	el.demoBtn.textContent = demo.paused ? 'PARTY' : 'REST';
+	el.demoBtn.title = demo.paused ? 'Wake the crew up' : 'Let the crew take a nap';
+	el.signinBtn.hidden = !(mode === 'demo' && !real.signedIn);
 }
 
 /** Samples album art and returns a few distinct, saturated hues. */
@@ -240,6 +288,78 @@ function rgbToHsl(r: number, g: number, b: number): [number, number, number] {
 	return [h * 60, sat, l];
 }
 
+// ---------- mode switching ----------
+function enterDemo(): void {
+	mode = 'demo';
+	setTrack(DEMO_TRACK);
+	s.bpm = DEMO_BPM;
+	s.bpmSource = 'demo';
+	updateBpmLabel();
+	showDemoLyrics();
+	document.documentElement.style.removeProperty('--accent');
+	stage.setHues(DEMO_HUES);
+	updateHeaderButtons();
+}
+
+/** Demo lyrics while the crew performs; hidden while they rest. */
+function showDemoLyrics(): void {
+	if (demo.paused) {
+		renderLyrics([], 'resting');
+		showEmpty('Zzz… the crew is taking a nap.');
+	} else {
+		renderLyrics(DEMO_LINES, 'synced');
+	}
+}
+
+function enterSpotify(): void {
+	mode = 'spotify';
+	const t = real.track;
+	setTrack(t);
+	if (t) {
+		if (real.lyrics?.trackId === t.id) {
+			renderLyrics(real.lyrics.lines, real.lyrics.kind, real.lyrics.source);
+		} else {
+			renderLyrics([], 'loading');
+			showEmpty('Looking for lyrics…');
+		}
+		if (real.tempo?.trackId === t.id) {
+			s.bpm = real.tempo.bpm;
+			s.bpmSource = 'api';
+			updateBpmLabel();
+		}
+	} else {
+		renderLyrics([], 'none');
+		refreshEmpty();
+	}
+	updateHeaderButtons();
+}
+
+function updateMode(now: number): void {
+	const spotifyPlaying = real.signedIn && !!real.track && real.isPlaying;
+	if (spotifyPlaying) {
+		real.lastPlayingAt = now;
+	}
+	const wantDemo = demo.enabled && !spotifyPlaying && now - real.lastPlayingAt > DEMO_GRACE_MS;
+	if (wantDemo && mode !== 'demo') {
+		enterDemo();
+	} else if (!wantDemo && mode === 'demo' && (spotifyPlaying || !demo.enabled)) {
+		enterSpotify();
+	}
+}
+
+el.demoBtn.addEventListener('click', () => {
+	demo.paused = !demo.paused;
+	if (!demo.paused) {
+		demo.elapsed = 0; // back from the nap: start the song over
+	}
+	vscode.setState({ demoPaused: demo.paused });
+	if (mode === 'demo') {
+		showDemoLyrics();
+	}
+	updateHeaderButtons();
+});
+el.signinBtn.addEventListener('click', () => vscode.postMessage({ type: 'signIn' }));
+
 // ---------- tap tempo ----------
 function tap(): void {
 	const now = performance.now();
@@ -271,35 +391,50 @@ el.stage.addEventListener('click', () => {
 // ---------- messages ----------
 window.addEventListener('message', ev => {
 	const m = ev.data;
+	const showing = mode === 'spotify';
 	switch (m.type) {
 		case 'auth':
-			s.signedIn = m.signedIn;
-			if (!m.signedIn) { setTrack(undefined); }
+			real.signedIn = m.signedIn;
+			if (!m.signedIn) {
+				real.track = undefined;
+				real.isPlaying = false;
+				if (showing) { setTrack(undefined); }
+			}
 			refreshEmpty();
+			updateHeaderButtons();
 			break;
 		case 'track':
-			setTrack(m.track);
-			if (m.track) { renderLyrics([], 'loading'); showEmpty('Looking for lyrics…'); }
+			real.track = m.track;
+			real.lyrics = undefined;
+			real.tempo = undefined;
+			if (showing) {
+				setTrack(m.track);
+				if (m.track) { renderLyrics([], 'loading'); showEmpty('Looking for lyrics…'); }
+			}
 			break;
 		case 'state': {
 			const incoming = m.progressMs + (Date.now() - m.timestamp);
-			const current = progress();
+			const current = realProgress();
 			const drift = incoming - current;
 			// Small differences are poll jitter: ease toward them so the fill doesn't twitch.
 			// Big ones (seek, pause/resume, new track) snap immediately.
-			s.progressMs = s.isPlaying && m.isPlaying && Math.abs(drift) < 150 ? current + drift * 0.3 : incoming;
-			s.isPlaying = m.isPlaying;
-			s.receivedAt = performance.now();
+			real.progressMs = real.isPlaying && m.isPlaying && Math.abs(drift) < 150 ? current + drift * 0.3 : incoming;
+			real.isPlaying = m.isPlaying;
+			real.receivedAt = performance.now();
 			break;
 		}
 		case 'lyricsLoading':
-			if (m.trackId === s.track?.id) { showEmpty('Looking for lyrics…'); }
+			if (showing && m.trackId === s.track?.id) { showEmpty('Looking for lyrics…'); }
 			break;
 		case 'lyrics':
-			if (m.trackId === s.track?.id) { renderLyrics(m.lines, m.kind, m.source); }
+			real.lyrics = { trackId: m.trackId, lines: m.lines, kind: m.kind, source: m.source };
+			if (showing && m.trackId === s.track?.id) { renderLyrics(m.lines, m.kind, m.source); }
 			break;
 		case 'tempo':
-			if (m.trackId === s.track?.id && m.bpm && s.bpmSource !== 'tap') {
+			if (m.bpm) {
+				real.tempo = { trackId: m.trackId, bpm: m.bpm };
+			}
+			if (showing && m.trackId === s.track?.id && m.bpm && s.bpmSource !== 'tap') {
 				s.bpm = m.bpm;
 				s.bpmSource = 'api';
 				updateBpmLabel();
@@ -316,6 +451,7 @@ window.addEventListener('message', ev => {
 			stage.setCreatureCount(m.creatureCount);
 			stage.showVisualizer = m.showVisualizer;
 			s.lineFill = m.lineFill ?? 'instant';
+			demo.enabled = m.demoWhenIdle ?? true;
 			break;
 		case 'tap':
 			tap();
@@ -325,16 +461,25 @@ window.addEventListener('message', ev => {
 
 // ---------- loop ----------
 const t0 = performance.now();
+let lastFrame = t0;
 function frame(): void {
+	const now = performance.now();
+	if (mode === 'demo' && !demo.paused) {
+		demo.elapsed += now - lastFrame;
+	}
+	lastFrame = now;
+	updateMode(now);
+
 	const ms = progress();
 	if (s.track) {
 		el.fill.style.width = `${(ms / s.track.durationMs) * 100}%`;
 	}
 	updateLyrics(ms);
-	stage.draw({ beats: beats(ms), playing: s.isPlaying && !!s.track, time: (performance.now() - t0) / 1000 });
+	stage.draw({ beats: beats(ms), playing: playing(), time: (now - t0) / 1000 });
 	requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
 
 refreshEmpty();
+updateHeaderButtons();
 vscode.postMessage({ type: 'ready' });

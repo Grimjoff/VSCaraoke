@@ -10,7 +10,7 @@ export type HostMessage =
 	| { type: 'lyricsLoading'; trackId: string }
 	| { type: 'tempo'; trackId: string; bpm?: number }
 	| { type: 'offset'; ms: number }
-	| { type: 'config'; creatureCount: number; showVisualizer: boolean; chaos: string; species: string[]; stageHeight: number; lineFill: string }
+	| { type: 'config'; creatureCount: number; showVisualizer: boolean; chaos: string; species: string[]; stageHeight: number; lineFill: string; demoWhenIdle: boolean }
 	| { type: 'tap' };
 
 /** Messages the webview sends back. */
@@ -97,6 +97,8 @@ export class VSCaraokeViewProvider implements vscode.WebviewViewProvider, vscode
 			<div id="progress"><div id="progress-fill"></div></div>
 		</div>
 		<div id="bpm" title="Click on the beat to tap the tempo"></div>
+		<button id="signin-btn" class="hbtn" hidden>SIGN IN</button>
+		<button id="demo-btn" class="hbtn" hidden></button>
 	</header>
 	<main id="lyrics-wrap">
 		<div id="lyrics"></div>

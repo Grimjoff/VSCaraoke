@@ -21,6 +21,8 @@ Every bar they pick a new move: bob, hop, sway, wave, spin, stomp, headbang. Som
 
 **Click the dance floor** to give everyone a fresh paint job.
 
+**Nothing playing?** The crew doesn't just stand around. They put on their own (silent) song, *Sproutling Shuffle*, lyrics included, until Spotify starts again. Tired of it? Hit **REST** in the panel and they'll take a nap.
+
 ## Install
 
 **Antigravity, Cursor, VSCodium and anything else that uses [Open VSX](https://open-vsx.org/extension/grimjoff/vscaraoke):** search for **VSCaraoke** in the Extensions view and hit Install. Updates come automatically.
@@ -57,6 +59,7 @@ Click the ⚙ in the panel's title bar to open all settings.
 | `vscaraoke.species` | all | Pick your favorites, e.g. `["wisp", "beepbox"]`. |
 | `vscaraoke.lineFill` | `instant` | `instant` lights up the whole line. `sweep` fills it as it's sung. |
 | `vscaraoke.showVisualizer` | on | The bars behind the crowd. |
+| `vscaraoke.demoWhenIdle` | on | The crew performs their own song when Spotify is quiet. |
 | `vscaraoke.stageHeight` | `112` | More room for the dance floor. |
 | `vscaraoke.lyricsOffsetMs` | `0` | Lyrics consistently early or late? Nudge them here. |
 | `vscaraoke.redirectUri` | `http://127.0.0.1:43821/callback` | Only if you need a different sign-in port. |

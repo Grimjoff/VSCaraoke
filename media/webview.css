@@ -181,6 +181,20 @@ html, body {
 
 #stage.flash { background: color-mix(in srgb, var(--flash, var(--accent)) 22%, transparent); }
 
+.hbtn {
+	flex: none;
+	font-family: var(--pixel);
+	font-size: 7px;
+	padding: 4px 6px;
+	color: var(--muted);
+	background: transparent;
+	border: 1px solid color-mix(in srgb, var(--muted) 50%, transparent);
+	cursor: pointer;
+}
+.hbtn:hover { color: var(--accent); border-color: var(--accent); }
+.hbtn:active { transform: translate(1px, 1px); }
+.hbtn[hidden] { display: none; }
+
 #bpm { cursor: pointer; padding: 3px 4px; user-select: none; }
 #bpm:hover { color: var(--accent); }
 #bpm.tapped { background: color-mix(in srgb, var(--accent) 30%, transparent); }
